@@ -7,7 +7,7 @@ const mapSchema = new Schema({
         unique: true,
         default: () => uuidv4()
     },
-    channel_id: {
+    webhook_id: {
         type: String,
         required: true
     },

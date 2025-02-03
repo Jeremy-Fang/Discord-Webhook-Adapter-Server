@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { validate as valid } from 'uuid';
+import { WebhookClient, EmbedBuilder, EmbedAssertions } from "discord.js";
+
 import Map from "../db/schemas/map";
 
 export const webhookPostEvent = async (request: Request, response: Response) => {
@@ -13,23 +15,27 @@ export const webhookPostEvent = async (request: Request, response: Response) => 
 
         const document = await Map.findOne({ ...params });
 
-        console.log(document);
-        
         if (!document) {
             throw Error('Matching document could not be found');
         }
 
-        const webhookURL = `https://discord.com/api/webhooks/${document.channel_id}/${document.token}`;
-
-        console.log(webhookURL);
+        const webhookURL = `https://discord.com/api/webhooks/${document.webhook_id}/${document.token}`;
 
         if (!Object.keys(body).length) {
             throw Error('Request body is missing');
         }
 
-        console.log(body);
+        const client = new WebhookClient({ url: webhookURL });
 
-        response.send({ statusCode: 200, body, document, url: webhookURL });
+        client.send({
+            content: JSON.stringify(body)
+        }).then(res => {
+            console.log(res);
+        }).catch(err => {
+            console.log(err);
+        });
+
+        response.send({ statusCode: 200, body, url: webhookURL });
     } catch (err) {
         console.error(err);
 

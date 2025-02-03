@@ -11,7 +11,7 @@ export const parseLink = (url: String) => {
 
         const data = urlObj.pathname.split('/');
 
-        return { channel_id: data[data.length-2], token: data[data.length-1] };
+        return { webhook_id: data[data.length-2], token: data[data.length-1] };
     } catch (err) {
         return {};
     }

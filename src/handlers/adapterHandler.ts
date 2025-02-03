@@ -33,7 +33,7 @@ export const registerDiscordWebhook = async (request: Request, response: Respons
 
         const data = parseLink(url);
 
-        if (!data.channel_id || !data.token) {
+        if (!data.webhook_id || !data.token) {
             throw Error('Invalid Webhook URL');
         }
 
@@ -65,7 +65,7 @@ export const updateDiscordWebhookMap = async (request: Request, response: Respon
 
         const data = parseLink(url);
 
-        if (!data.channel_id || !data.token) {
+        if (!data.webhook_id || !data.token) {
             throw Error('Invalid Webhook URL');
         }
 
@@ -74,7 +74,7 @@ export const updateDiscordWebhookMap = async (request: Request, response: Respon
         if (!document) {
             throw Error('Document could not be updated');
         }
-        
+
         response.send({ statusCode: 200, document, message: 'Document successfully updated' });
     } catch (err) {
         console.error(err);
