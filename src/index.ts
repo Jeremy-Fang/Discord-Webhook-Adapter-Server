@@ -2,8 +2,10 @@ import 'dotenv/config';
 
 import express from 'express';
 import cors from 'cors';
-import adapterRouter from './routes/adapterRoutes';
 import mongoose from 'mongoose';
+
+import adapterRouter from './routes/adapterRoutes';
+import eventRouter from './routes/eventRoutes';
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/api/adapter', adapterRouter);
+app.use('/api/event', eventRouter);
 
 mongoose.connect(process.env.MONGO_DB_URI).then(() => {
     console.log('Connected to MongoDB');

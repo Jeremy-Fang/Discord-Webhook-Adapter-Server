@@ -71,6 +71,10 @@ export const updateDiscordWebhookMap = async (request: Request, response: Respon
 
         const document = await Map.findOneAndUpdate({ uuid }, data, { new: true });
 
+        if (!document) {
+            throw Error('Document could not be updated');
+        }
+        
         response.send({ statusCode: 200, document, message: 'Document successfully updated' });
     } catch (err) {
         console.error(err);
