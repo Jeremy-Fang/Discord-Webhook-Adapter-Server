@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { validate as valid } from 'uuid';
-import { WebhookClient, EmbedBuilder, EmbedAssertions } from "discord.js";
+import { WebhookClient, EmbedBuilder } from "discord.js";
 
 import Map from "../db/schemas/map";
 
@@ -28,9 +28,9 @@ export const webhookPostEvent = async (request: Request, response: Response) => 
         const client = new WebhookClient({ url: webhookURL });
 
         client.send({
-            content: JSON.stringify(body)
-        }).then(res => {
-            console.log(res);
+            content: JSON.stringify(body),
+            username: 'Steam Discount Bot',
+            avatarURL: 'https://cdn.freebiesupply.com/images/large/2x/steam-logo-transparent.png',
         }).catch(err => {
             console.log(err);
         });
