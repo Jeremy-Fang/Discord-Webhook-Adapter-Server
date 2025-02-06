@@ -5,17 +5,17 @@ import { generateCodeChallenge, generateCodeVerifier, generateState } from '../s
 
 export const authorize = async (request: Request, response: Response) => {
     try {
+        console.log("COOKIES", request.cookies);
+
         const code = generateCodeVerifier();
         const state = generateState();
         const codeChallenge = generateCodeChallenge(code);
 
         let scope = [];
-
-        console.log("code", code);
-        console.log("state", state);
-        console.log("challenge", codeChallenge);
         
         scope.push('user_info');
+
+        response.cookie(state, code, { maxAge: 1000*60*5 });
 
         let authUrl = process.env.AUTH_BASE_URL;
         
@@ -27,7 +27,7 @@ export const authorize = async (request: Request, response: Response) => {
         authUrl += `&code_challenge=${codeChallenge}`;
         authUrl += `&code_challenge_method=S256`;
 
-        response.send({ statusCode: 200, code, codeChallenge, authUrl });
+        response.redirect(authUrl);
     } catch (err) {
         console.error(err);
 
@@ -47,10 +47,40 @@ export const redirect = async (request: Request, response: Response) => {
             throw Error('State missing');
         }
 
-        const code = query.code;
-        const state = query.state;
+        const code = query.code.toString();
+        const state = query.state.toString();
 
-        response.send({ statusCode: 200, state, code });
+        if (!(state in request.cookies)) {
+            throw Error('Could not verify code_verifier');
+        }
+
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+
+        let body = {
+            client_id: process.env.IS_THERE_ANY_DEAL_CLIENT_ID,
+            grant_type: "authorization_code",
+            code_verifier: request.cookies[state],
+            code,
+            redirect_uri: process.env.AUTH_REDIRECT_URL
+        };
+
+
+        const data = await fetch(process.env.TOKEN_BASE_URL, { body: new URLSearchParams(body), ...options });
+        const content = await data.json();
+
+        if (Object.keys(content).indexOf('access_token') == -1) {
+            throw Error('Unable to retrieve access token');
+        }
+
+        response.cookie('access_token', content['access_token']);
+
+        response.send({ statusCode: 200, access_token: content['access_token'] });
     } catch (err) {
         console.error(err);
 
