@@ -14,6 +14,10 @@ export const authorize = async (request: Request, response: Response) => {
         let scope = [];
         
         scope.push('user_info');
+        scope.push('profiles');
+        scope.push('wait_read');
+        scope.push('wait_write');
+        
 
         response.cookie(state, code, { maxAge: 1000*60*5 });
 
