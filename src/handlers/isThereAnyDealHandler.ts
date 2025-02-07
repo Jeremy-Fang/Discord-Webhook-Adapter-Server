@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 
+/**
+ * Function that gets the username of the user associated with the provided
+ * access token
+ * 
+ * @param request 
+ * @param response 
+ */
 export const getUser = async (request: Request, response: Response) => {
     try {
-        if (!request.cookies.access_token) {
-            throw Error('Access token required for this function');
-        }
-
         const token = request.cookies.access_token;
         const headers = {
             Authorization: `Bearer ${token}`
@@ -25,12 +28,14 @@ export const getUser = async (request: Request, response: Response) => {
     }
 }
 
+/**
+ * Function that gets the waitlist of the user associated with the provided access token
+ * 
+ * @param request 
+ * @param response 
+ */
 export const getWaitlist = async (request: Request, response: Response) => {
     try {
-        if (!request.cookies.access_token) {
-            throw Error('Access token required for this function');
-        }
-
         const token = request.cookies.access_token;
         const headers = {
             Authorization: `Bearer ${token}`
@@ -50,6 +55,13 @@ export const getWaitlist = async (request: Request, response: Response) => {
     }
 }
 
+/**
+ * Function that adds an array of games (uuids) to the waitlist of the user associated
+ * with the provided access token
+ * 
+ * @param request 
+ * @param response 
+ */
 export const addToWaitlist = async (request: Request, response: Response) => {
     try {
         const body = request.body;
@@ -57,10 +69,6 @@ export const addToWaitlist = async (request: Request, response: Response) => {
 
         if (!ids) {
             throw Error('Game ID(s) is missing');
-        }
-
-        if (!request.cookies.access_token) {
-            throw Error('Access token required for this function');
         }
 
         const token = request.cookies.access_token;
@@ -83,6 +91,13 @@ export const addToWaitlist = async (request: Request, response: Response) => {
     }
 }
 
+/**
+ * Function that removes an array of games (uuids) from the waitlist of the user associated
+ * with the provided access token
+ * 
+ * @param request 
+ * @param response 
+ */
 export const deleteFromWaitlist = async (request: Request, response: Response) => {
     try {
         const body = request.body;
@@ -90,10 +105,6 @@ export const deleteFromWaitlist = async (request: Request, response: Response) =
 
         if (!ids) {
             throw Error('Game ID(s) is missing');
-        }
-
-        if (!request.cookies.access_token) {
-            throw Error('Access token required for this function');
         }
 
         const token = request.cookies.access_token;

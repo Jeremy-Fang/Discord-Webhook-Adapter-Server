@@ -3,10 +3,15 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from '../services/auth/pkce';
 
+/**
+ * Function which starts the PKCE authorization flow, generating a code_verifier, state, and challenge.
+ * Afterewards, redirects to the IsThereAnyDeal authorization page.
+ * 
+ * @param request 
+ * @param response 
+ */
 export const authorize = async (request: Request, response: Response) => {
     try {
-        console.log("COOKIES", request.cookies);
-
         const code = generateCodeVerifier();
         const state = generateState();
         const codeChallenge = generateCodeChallenge(code);
@@ -17,7 +22,6 @@ export const authorize = async (request: Request, response: Response) => {
         scope.push('profiles');
         scope.push('wait_read');
         scope.push('wait_write');
-        
 
         response.cookie(state, code, { maxAge: 1000*60*5 });
 
@@ -39,6 +43,14 @@ export const authorize = async (request: Request, response: Response) => {
     }
 }
 
+/**
+ * Function called after the user has authorized the application. Takes state and 
+ * authorization code returned by the IsThereAnyDeal authorization server and trades
+ * it for an access token, then stores it in a cookie.
+ * 
+ * @param request 
+ * @param response 
+ */
 export const redirect = async (request: Request, response: Response) => {
     try {
         const query = request.query;

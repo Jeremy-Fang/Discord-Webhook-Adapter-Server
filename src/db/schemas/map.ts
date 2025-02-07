@@ -18,6 +18,9 @@ const mapSchema = new Schema({
     }
 });
 
+/**
+ * Maps a uuid to a discord webhook
+ */
 const Map = mongoose.model('Map', mapSchema);
 
 export default Map;

@@ -2,6 +2,7 @@
 /**
  * Function which takes a string url and parses to ensure it's 
  * a discord webhook url
+ * 
  * @param url String discord webhook url
  * @returns Object containing the channel_id and token contained in the url
  */

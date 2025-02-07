@@ -3,6 +3,13 @@ import { parseLink } from "../services/utilities/parser";
 import { validate as valid } from 'uuid';
 import Map from '../db/schemas/map';
 
+/**
+ * Function which retrieves discord webhook data corresponding to the uuid passed
+ * as a parameter
+ * 
+ * @param request 
+ * @param response 
+ */
 export const getDiscordWebhookById = async (request: Request, response: Response) => {
     try {
         const params = request.params;
@@ -22,6 +29,12 @@ export const getDiscordWebhookById = async (request: Request, response: Response
     }
 }
 
+/**
+ * Maps a discord webhook to a unique uuid
+ * 
+ * @param request 
+ * @param response 
+ */
 export const registerDiscordWebhook = async (request: Request, response: Response) => {
     try {
         const body = request.body;
@@ -47,6 +60,12 @@ export const registerDiscordWebhook = async (request: Request, response: Respons
     }
 }
 
+/**
+ * Updates existing entry in the database using data passed in the request body
+ * 
+ * @param request 
+ * @param response 
+ */
 export const updateDiscordWebhookMap = async (request: Request, response: Response) => {
     try {
         const body = request.body;
@@ -83,6 +102,12 @@ export const updateDiscordWebhookMap = async (request: Request, response: Respon
     }
 }
 
+/**
+ * Deletes an entry in the database corresponding to the uuid passed in the parameters
+ * 
+ * @param request 
+ * @param response 
+ */
 export const deleteDiscordWebhookMap = async (request: Request, response: Response) => {
     try {
         const params = request.params;

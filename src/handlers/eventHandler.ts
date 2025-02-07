@@ -4,6 +4,13 @@ import { WebhookClient, EmbedBuilder } from "discord.js";
 
 import Map from "../db/schemas/map";
 
+/**
+ * Function which is called by the IsThereAnyDeal webhook. It adapts the content posted
+ * by the webhook and sends it to the corresponding discord channel registered on the server
+ * 
+ * @param request 
+ * @param response 
+ */
 export const webhookPostEvent = async (request: Request, response: Response) => {
     try {
         const body = request.body;
