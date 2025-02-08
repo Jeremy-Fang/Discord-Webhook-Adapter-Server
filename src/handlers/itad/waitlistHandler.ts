@@ -1,34 +1,6 @@
 import { Request, Response } from 'express';
 
 /**
- * Function that gets the username of the user associated with the provided
- * access token
- * 
- * @param request 
- * @param response 
- */
-export const getUser = async (request: Request, response: Response) => {
-    try {
-        const token = request.cookies.access_token;
-        const headers = {
-            Authorization: `Bearer ${token}`
-        };
-        
-        const data = await fetch('https://api.isthereanydeal.com/user/info/v2', {
-            headers
-        });
-
-        const content = await data.json();
-
-        response.send({ statusCode: 200, content });
-    } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
-    }
-}
-
-/**
  * Function that gets the waitlist of the user associated with the provided access token
  * 
  * @param request 
