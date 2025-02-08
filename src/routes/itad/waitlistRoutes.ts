@@ -1,13 +1,17 @@
 import { Router } from "express";
-import { deleteFromWaitlist, addToWaitlist, getWaitlist } from "../../handlers/itad/waitlistHandler";
+import { 
+    deleteFromWaitlistHandler, 
+    addToWaitlistHandler, 
+    getWaitlistHandler 
+} from "../../handlers/itad/waitlistHandler";
 import { isAuthorized } from "../../services/auth/auth";
 
 const waitlistRouter = Router();
 
-waitlistRouter.get('/', isAuthorized, getWaitlist);
+waitlistRouter.get('/', isAuthorized, getWaitlistHandler);
 
-waitlistRouter.put('/add', isAuthorized, addToWaitlist);
+waitlistRouter.put('/add', isAuthorized, addToWaitlistHandler);
 
-waitlistRouter.delete('/remove', isAuthorized, deleteFromWaitlist);
+waitlistRouter.delete('/remove', isAuthorized, deleteFromWaitlistHandler);
 
 export default waitlistRouter;

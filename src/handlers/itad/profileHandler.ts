@@ -3,39 +3,37 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const registerProfile = async (request: Request, response: Response) => {
     try {
-        // const body = request.body;
+        const body = request.body;
         const token = request.cookies.access_token;
 
-        // if (!body) {
-        //     throw Error('Request body is missing');
-        // }
+        if (!body) {
+            throw Error('Request body is missing');
+        }
 
-        // const id = body.accountId;
+        const id = body.accountId;
 
-        // if (!id) {
-        //     throw Error('Account ID missing from request body');
-        // }
+        if (!id) {
+            throw Error('Account ID missing from request body');
+        }
 
-        // const name = body.accountName;
+        const name = body.accountName;
         const headers = {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         };
 
-        // if (!name) {
-        //     throw Error('Name is required');
-        // }
+        if (!name) {
+            throw Error('Name is required');
+        }
 
         const data = await fetch('https://api.isthereanydeal.com/profiles/link/v1', {
             method: 'PUT',
             headers,
-            body: JSON.stringify({
-                "accountId": uuidv4(),
-                "accountName": "My Account"
+            body: JSON.stringify({ 
+                accountId: id,
+                accountName: name
             })
         });
-
-        console.log(data);
 
         const content = await data.json();
 

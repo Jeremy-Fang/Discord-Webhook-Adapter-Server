@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import { Request, Response } from 'express';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from '../services/auth/pkce';
+import { getAccessToken } from '../services/itad/api';
 
 /**
  * Function which starts the PKCE authorization flow, generating a code_verifier, state, and challenge.
@@ -70,33 +71,13 @@ export const redirect = async (request: Request, response: Response) => {
             throw Error('Could not verify code_verifier');
         }
 
+        const access_token = await getAccessToken(request.cookies[state], code);
 
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        };
-
-        let body = {
-            client_id: process.env.IS_THERE_ANY_DEAL_CLIENT_ID,
-            grant_type: "authorization_code",
-            code_verifier: request.cookies[state],
-            code,
-            redirect_uri: process.env.AUTH_REDIRECT_URL
-        };
-
-
-        const data = await fetch(process.env.TOKEN_BASE_URL, { body: new URLSearchParams(body), ...options });
-        const content = await data.json();
-
-        if (Object.keys(content).indexOf('access_token') == -1) {
-            throw Error('Unable to retrieve access token');
+        if (access_token.statusCode == 500) {
+            throw Error(access_token.message);
         }
-
-        response.cookie('access_token', content['access_token']);
-
-        response.send({ statusCode: 200, access_token: content['access_token'] });
+        
+        response.send({ statusCode: 200, access_token });
     } catch (err) {
         console.error(err);
 
