@@ -9,13 +9,10 @@ import { Request, Response, NextFunction } from 'express';
  * @returns 
  */
 export const isAuthorized = (request: Request, response: Response, next: NextFunction) => {
-    console.log(request.cookies)
     const access_token = request.cookies.access_token;
 
     if (!access_token) {
-        response.status(401);
-        
-        return next(new Error('User is not authorized to access this endpoint'));
+        return response.send({ status: 401, message: '[ERROR] Unauthorized Request. Please make sure a valid IsThereAnyDeal access token is included in the session cookies' });
     }
 
     return next();

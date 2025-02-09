@@ -1,30 +1,30 @@
-
+import { ResponseError } from '../../types/types';
 
 /**
  * Function that returns an array of ITAD game ids matching the input array
  * of steam game ids
  * 
  * @param ids Array of steam game ids
- * @returns Array of IsThereAnyDeal game ids 
+ * @returns Object containing a status code and array of IsThereAnyDeal game ids 
  */
 export const steamIdsToITADIds = async (ids: number[]) => {
     try {
         const steamShopId = '61'; // steam shop id
         const idsWithPrefix = ids.map(id => `app/${id}`)
-        const data = await fetch(`https://api.isthereanydeal.com/lookup/id/shop/${steamShopId}/v1`, {
+        const response = await fetch(`https://api.isthereanydeal.com/lookup/id/shop/${steamShopId}/v1`, {
             method: 'POST',
             body: JSON.stringify(idsWithPrefix)
         });
 
-        if (!data.ok) {
-            throw Error('Internal server error');
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Please make sure the ids are numbers', response.status);
         }
 
-        const ITADMap = await data.json();
+        const ITADMap = await response.json();
 
-        return { statusCode: 200, ids: idsWithPrefix.map(id => ITADMap[id]) };
+        return { status: 200, ids: idsWithPrefix.map(id => ITADMap[id]) };
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
 
@@ -41,15 +41,23 @@ export const getWaitlist = async (token: string) => {
             Authorization: `Bearer ${token}`
         };
         
-        const data = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
+        const response = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
             headers
         });
     
-        const content = await data.json();
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Something went wrong', response.status);
+        }
+
+        if (response.status == 401) {
+            throw new ResponseError('[ERROR] Invalid access token. Please get a new valid access token', response.status);
+        }
+
+        const content = await response.json();
     
-        return { statusCode: data.status, content };
+        return { status: response.status, content };
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
 
@@ -68,15 +76,23 @@ export const addToWaitlist = async (token: string, ids: string[]) => {
             Authorization: `Bearer ${token}`
         };
 
-        const data = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
+        const response = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
             method: 'PUT',
             headers,
             body: JSON.stringify(ids)
         });
 
-        return { statusCode: data.status };
+        if (response.status == 401) {
+            throw new ResponseError('[ERROR] Invalid access token. Please get a new valid access token', response.status);
+        }
+
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Please make sure the ids are uuids', response.status);
+        }
+
+        return { status: response.status, message: 'Games successfully added to waitlist' };
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
 
@@ -95,15 +111,23 @@ export const deleteFromWaitlist = async (token: string, ids: string[]) => {
             Authorization: `Bearer ${token}`
         };
 
-        const data = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
+        const response = await fetch('https://api.isthereanydeal.com/waitlist/games/v1', {
             method: 'DELETE',
             headers,
             body: JSON.stringify(ids)
         });
 
-        return { statusCode: data.status };
+        if (response.status == 401) {
+            throw new ResponseError('[ERROR] Invalid access token. Please get a new valid access token', response.status);
+        }
+
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Please make sure the ids are uuids', response.status);
+        }
+
+        return { status: response.status, message: 'Games successfully removed to waitlist' };
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
 
@@ -132,16 +156,16 @@ export const getAccessToken = async (code_verifier: string, code: string) => {
         };
     
     
-        const data = await fetch(process.env.TOKEN_BASE_URL, { body: new URLSearchParams(body), ...options });
+        const response = await fetch(process.env.TOKEN_BASE_URL, { body: new URLSearchParams(body), ...options });
     
-        const content = await data.json();
+        const content = await response.json();
     
         if (Object.keys(content).indexOf('access_token') == -1) {
-            throw Error('Unable to retrieve access token');
+            throw new ResponseError('[ERROR] Unable to retrieve access token', 401);
         }
     
         return content['access_token'];
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }

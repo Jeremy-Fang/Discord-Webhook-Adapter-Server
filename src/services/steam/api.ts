@@ -1,22 +1,5 @@
-
-interface SteamUserProfileResponse {
-    response: {
-        players: [{
-            steamid: string;
-            communityvisibilitystate: number;
-        }];
-    };
-}
-
-interface SteamWishlist {
-    response: {
-        items: [{
-            appid: number;
-            priority: number;
-            date_added: Date;
-        }];
-    };
-}
+import { ResponseError } from "../../types/types";
+import { SteamWishlistResponse, SteamUserProfileResponse } from "../../types/types";
 
 /**
  * Function which gets the steam wishlist of the user associated with the id
@@ -31,26 +14,21 @@ export const getWishlist = async (steamid: string) => {
 
         url += `?steamid=${steamid}`;
 
-
         const response = await fetch(url);
 
-        if (!response.ok) {
-            throw Error('Could not complete api request');
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Make sure the appid is correct', 400);
         }
 
-        const wishlist = await response.json() as SteamWishlist;
-
-        if (!wishlist.response) {
-            throw Error('Internal server error');
-        }
+        const wishlist = await response.json() as SteamWishlistResponse;
 
         if (!wishlist.response.items) {
-            throw Error('Could not retrieve wishlist, please make sure the steam users wishlist is public');
+            throw new ResponseError('[ERROR] Could not retrieve wishlist. Please make sure the Steam users wishlist is public', 401);
         }
 
         return { statusCode: 200, wishlist: wishlist.response.items.map(obj => obj.appid) };
     } catch (err) {
-        return { statusCode: 500, message: err.message };
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
 
@@ -60,7 +38,7 @@ export const getWishlist = async (steamid: string) => {
  * (necessary to access wishlist)
  * 
  * @param steamid steam id
- * @returns boolean whether or not the users steam profile is public
+ * @returns Object containing whether or not the users steam profile is public
  */
 export const getUserPublicStatus = async (steamid: string) => {
     try {
@@ -71,18 +49,30 @@ export const getUserPublicStatus = async (steamid: string) => {
 
         const response = await fetch(url);
 
-        if (!response.ok) {
-            return false;
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Make sure the appid is correct', 400);
         }
 
         const user = await response.json() as SteamUserProfileResponse;
 
         if (!user.response.players.length) {
-            return false;
+            throw new ResponseError('[ERROR] User not found', 404);
         }
 
-        return user.response.players[0].communityvisibilitystate == 3;
+        return { status: 200, profilePublic: user.response.players[0].communityvisibilitystate == 3 };
     } catch (err) {
-        return false;
+        return { status: err.status ? err.status: 500, message: err.message };
+    }
+}
+
+export const getSteamAppDetails = async (appid: string) => {
+    try {
+        const response = await fetch(`http://store.steampowered.com/api/appdetails/?appids=${appid}&cc=CA`);
+
+        if (response.status == 400) {
+            throw new ResponseError('[ERROR] Bad Request. Make sure the appid is correct', 400);
+        }
+    } catch (err) {
+        return { status: err.status ? err.status: 500, message: err.message };
     }
 }
