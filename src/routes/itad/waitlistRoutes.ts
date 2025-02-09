@@ -9,12 +9,14 @@ import { isAuthorized } from "../../services/auth/auth";
 
 const waitlistRouter = Router();
 
-waitlistRouter.get('/', isAuthorized, getWaitlistHandler);
+waitlistRouter.use(isAuthorized);
 
-waitlistRouter.put('/add', isAuthorized, addToWaitlistHandler);
+waitlistRouter.get('/', getWaitlistHandler);
 
-waitlistRouter.delete('/remove', isAuthorized, deleteFromWaitlistHandler);
+waitlistRouter.put('/add', addToWaitlistHandler);
 
-waitlistRouter.post('/steamid/:steamid', isAuthorized, addSteamWishlist);
+waitlistRouter.delete('/remove', deleteFromWaitlistHandler);
+
+waitlistRouter.post('/steamid/:steamid', addSteamWishlist);
 
 export default waitlistRouter;

@@ -9,6 +9,7 @@ import adapterRouter from './routes/adapterRoutes';
 import eventRouter from './routes/eventRoutes';
 import authRouter from './routes/authRoutes';
 import waitlistRouter from './routes/itad/waitlistRoutes';
+import { logger } from './services/utilities/logger';
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use(cors({
 app.use(cookieParser());
 
 app.use(express.json());
+
+app.use(logger);
 
 app.use('/api/adapter', adapterRouter);
 app.use('/api/event', eventRouter);

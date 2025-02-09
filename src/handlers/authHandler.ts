@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from '../services/auth/pkce';
 import { getAccessToken } from '../services/itad/api';
+import { ResponseError } from '../types/types';
 
 /**
  * Function which starts the PKCE authorization flow, generating a code_verifier, state, and challenge.
@@ -38,9 +39,7 @@ export const authorize = async (request: Request, response: Response) => {
 
         response.redirect(authUrl);
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }
 
@@ -57,30 +56,28 @@ export const redirect = async (request: Request, response: Response) => {
         const query = request.query;
         
         if (!query.code) {
-            throw Error('Authorization code missing');
+            throw new ResponseError('[ERROR] Malformed Request. Authorization code missing', 400);
         }
 
         if (!query.state) {
-            throw Error('State missing');
+            throw new ResponseError('[ERROR] Malformed Request. State missing', 400);
         }
 
         const code = query.code.toString();
         const state = query.state.toString();
 
         if (!(state in request.cookies)) {
-            throw Error('Could not verify code_verifier');
+            throw new ResponseError('[ERROR] Not Found. Code Verifier not found in cookies', 404);
         }
 
         const access_token = await getAccessToken(request.cookies[state], code);
 
         if (access_token.statusCode == 500) {
-            throw Error(access_token.message);
+            throw new ResponseError(access_token.message, 500);
         }
         
-        response.send({ statusCode: 200, access_token });
+        response.send({ status: 200, access_token });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }

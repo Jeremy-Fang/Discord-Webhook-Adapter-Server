@@ -6,6 +6,7 @@ import {
     steamIdsToITADIds
 } from '../../services/itad/api';
 import { getWishlist } from '../../services/steam/api';
+import { ResponseError } from '../../types/types';
 
 /**
  * Function that gets the waitlist of the user associated with the provided access token
@@ -17,17 +18,15 @@ export const getWaitlistHandler = async (request: Request, response: Response) =
     try {
         const token = request.cookies.access_token;
 
-        const content = await getWaitlist(token);
+        const waitlistResponse= await getWaitlist(token);
 
-        if (content.statusCode == 500) {
-            throw Error(content.message);
+        if (waitlistResponse.status != 200) {
+            throw new ResponseError(waitlistResponse.message, waitlistResponse.status);
         }
 
-        response.send({ statusCode: 200, content });
+        response.send({ status: 200, waitlist: waitlistResponse.content });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }
 
@@ -44,22 +43,20 @@ export const addToWaitlistHandler = async (request: Request, response: Response)
         const ids = body.ids;
 
         if (!ids) {
-            throw Error('Game ID(s) is missing');
+            throw new ResponseError('[ERROR] Malformed Request. Game ID(s) is missing', 400);
         }
 
         const token = request.cookies.access_token;
 
-        const data = await addToWaitlist(token, ids);
+        const res = await addToWaitlist(token, ids);
 
-        if (data.statusCode == 500) {
-            throw Error(data.message);
+        if (res.status != 200) {
+            throw new ResponseError(res.message, res.status);
         }
 
-        response.send({ statusCode: data.statusCode });
+        response.send({ status: res.status, message: res.message });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }
 
@@ -76,22 +73,20 @@ export const deleteFromWaitlistHandler = async (request: Request, response: Resp
         const ids = body.ids;
 
         if (!ids) {
-            throw Error('Game ID(s) is missing');
+            throw new ResponseError('[ERROR] Malformed Request. Game ID(s) is missing', 400);
         }
 
         const token = request.cookies.access_token;
 
-        const data = await deleteFromWaitlist(token, ids);
+        const res = await deleteFromWaitlist(token, ids);
 
-        if (data.statusCode == 500) {
-            throw Error(data.message);
+        if (res.status != 200) {
+            throw new ResponseError(res.message, res.status);
         }
 
-        response.send({ statusCode: data.statusCode });
+        response.send({ status: res.status, message: res.message });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }
 
@@ -110,28 +105,26 @@ export const addSteamWishlist = async (request: Request, response: Response) => 
         const wishlist = await getWishlist(steamid);
 
         if (wishlist.statusCode != 200) {
-            throw Error('Could not retrieve wishlist, please make sure the wishlist is public');
+            throw new ResponseError(wishlist.message, wishlist.status);
         } 
 
         const ITADIds = await steamIdsToITADIds(wishlist.wishlist);
         const token = request.cookies.access_token;
 
-        if (ITADIds.statusCode != 200) {
-            throw Error('Problem occurred while querying the IsThereAnyDeal api');
+        if (ITADIds.status != 200) {
+            throw new ResponseError(wishlist.message, wishlist.status);
         }
 
         const { ids } = ITADIds;
         
-        const data = await addToWaitlist(token, ids);
+        const res = await addToWaitlist(token, ids);
         
-        if (!(data.statusCode == 200 || data.statusCode == 204)) {
-            throw Error('Error adding items to wishlist');
+        if (res.status != 200) {
+            throw new ResponseError(res.message, res.status);
         }
 
-        response.send({ statusCode: 200, message: 'Successfully added wishlist items to IsThereAnyDeal waitlist' });
+        response.send({ status: 200, message: 'Successfully added wishlist items to IsThereAnyDeal waitlist' });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, message: err.message });
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }

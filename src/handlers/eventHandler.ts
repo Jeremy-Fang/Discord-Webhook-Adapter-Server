@@ -3,6 +3,7 @@ import { validate as valid } from 'uuid';
 import { WebhookClient, EmbedBuilder } from "discord.js";
 
 import Map from "../db/schemas/map";
+import { ResponseError } from "../types/types";
 
 /**
  * Function which is called by the IsThereAnyDeal webhook. It adapts the content posted
@@ -15,21 +16,22 @@ export const webhookPostEvent = async (request: Request, response: Response) => 
     try {
         const body = request.body;
         const params = request.params;
+        const uuid = params.uuid;
 
-        if (!valid(params.uuid)) {
-            throw Error('Invalid UUID');
+        if (!valid(uuid)) {
+            throw new ResponseError('[ERROR] Malformed Request. Invalid UUID', 400);
         }
 
         const document = await Map.findOne({ ...params });
 
         if (!document) {
-            throw Error('Matching document could not be found');
+            throw new ResponseError('[ERROR] Not Found. Matching document could not be found', 404);
         }
 
         const webhookURL = `https://discord.com/api/webhooks/${document.webhook_id}/${document.token}`;
 
         if (!Object.keys(body).length) {
-            throw Error('Request body is missing');
+            throw new ResponseError('[ERROR] Malformed Request. Request body is missing', 400);
         }
 
         const client = new WebhookClient({ url: webhookURL });
@@ -38,14 +40,10 @@ export const webhookPostEvent = async (request: Request, response: Response) => 
             content: JSON.stringify(body),
             username: 'Steam Discount Bot',
             avatarURL: 'https://cdn.freebiesupply.com/images/large/2x/steam-logo-transparent.png',
-        }).catch(err => {
-            console.log(err);
         });
 
-        response.send({ statusCode: 200, body, url: webhookURL });
+        response.send({ status: 200, body, url: webhookURL });
     } catch (err) {
-        console.error(err);
-
-        response.send({ statusCode: 500, error: err.message});
+        response.send({ status: err.status ? err.status: 500, message: err.message });
     }
 }
