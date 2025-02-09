@@ -31,7 +31,6 @@ export const getWishlist = async (steamid: string) => {
 
         url += `?steamid=${steamid}`;
 
-        console.log(url);
 
         const response = await fetch(url);
 
@@ -49,7 +48,7 @@ export const getWishlist = async (steamid: string) => {
             throw Error('Could not retrieve wishlist, please make sure the steam users wishlist is public');
         }
 
-        return wishlist.response.items.map(obj => obj.appid);
+        return { statusCode: 200, wishlist: wishlist.response.items.map(obj => obj.appid) };
     } catch (err) {
         return { statusCode: 500, message: err.message };
     }

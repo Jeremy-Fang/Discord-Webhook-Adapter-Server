@@ -22,7 +22,7 @@ export const steamIdsToITADIds = async (ids: number[]) => {
 
         const ITADMap = await data.json();
 
-        return idsWithPrefix.map(id => ITADMap[id]);
+        return { statusCode: 200, ids: idsWithPrefix.map(id => ITADMap[id]) };
     } catch (err) {
         return { statusCode: 500, message: err.message };
     }
