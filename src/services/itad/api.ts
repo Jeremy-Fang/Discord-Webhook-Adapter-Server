@@ -1,6 +1,34 @@
 
 
 /**
+ * Function that returns an array of ITAD game ids matching the input array
+ * of steam game ids
+ * 
+ * @param ids Array of steam game ids
+ * @returns Array of IsThereAnyDeal game ids 
+ */
+export const steamIdsToITADIds = async (ids: number[]) => {
+    try {
+        const steamShopId = '61'; // steam shop id
+        const idsWithPrefix = ids.map(id => `app/${id}`)
+        const data = await fetch(`https://api.isthereanydeal.com/lookup/id/shop/${steamShopId}/v1`, {
+            method: 'POST',
+            body: JSON.stringify(idsWithPrefix)
+        });
+
+        if (!data.ok) {
+            throw Error('Internal server error');
+        }
+
+        const ITADMap = await data.json();
+
+        return idsWithPrefix.map(id => ITADMap[id]);
+    } catch (err) {
+        return { statusCode: 500, message: err.message };
+    }
+}
+
+/**
  * Function that makes fetch request for waitlist of user associated with
  * the passed access token
  * 
@@ -33,7 +61,7 @@ export const getWaitlist = async (token: string) => {
  * @param ids Array containing game ids
  * @returns Object containing response information
  */
-export const addToWaitlist = async (token: string, ids: [string]) => {
+export const addToWaitlist = async (token: string, ids: string[]) => {
     try {
         const headers = {
             'Content-Type': 'application/json',
@@ -60,7 +88,7 @@ export const addToWaitlist = async (token: string, ids: [string]) => {
  * @param ids Array containing game ids
  * @returns Object containing response information
  */
-export const deleteFromWaitlist = async (token: string, ids: [string]) => {
+export const deleteFromWaitlist = async (token: string, ids: string[]) => {
     try {
         const headers = {
             'Content-Type': 'application/json',

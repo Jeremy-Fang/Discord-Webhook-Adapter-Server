@@ -10,7 +10,6 @@ import eventRouter from './routes/eventRoutes';
 import authRouter from './routes/authRoutes';
 import waitlistRouter from './routes/itad/waitlistRoutes';
 import profileRouter from './routes/itad/profileRoutes';
-import { getWaitlist } from './services/itad/api';
 
 const app = express();
 
