@@ -10,20 +10,6 @@ const options: swaggerJsdoc.options = {
             title: 'REST API Documentation',
             version
         },
-        components: {
-            securitySchemas: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT'
-                }
-            }
-        },
-        security: [
-            {
-                bearerAuth: []
-            }
-        ]
     },
     apis: ['./src/routes/*.ts', './src/routes/*/*.ts']
 };
@@ -32,10 +18,10 @@ const swaggerSpec = swaggerJsdoc(options);
 
 function swaggerDocs(app: Express, port: number) {
     // Swagger page
-    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
     // Docs in JSON format
-    app.get('docs.json', (request: Request, response: Response) => {
+    app.get('/docs.json', (request: Request, response: Response) => {
         response.setHeader('Content-Type', 'application/json');
         response.send(swaggerSpec);
     });
