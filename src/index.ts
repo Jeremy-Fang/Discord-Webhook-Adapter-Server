@@ -10,6 +10,7 @@ import eventRouter from './routes/eventRoutes';
 import authRouter from './routes/authRoutes';
 import waitlistRouter from './routes/itad/waitlistRoutes';
 import { logger } from './services/utilities/logger';
+import swaggerDocs from './services/utilities/swagger';
 
 const app = express();
 
@@ -33,5 +34,8 @@ mongoose.connect(process.env.MONGO_DB_URI).then(async () => {
 
     app.listen(process.env.PORT, () => {
         console.log(`App is listening on port ${process.env.PORT}`);
+
+        swaggerDocs(app, Number(process.env.PORT));
+        console.log(`Documentation available at http://localhost:${process.env.PORT}/docs`);
     });
 });
