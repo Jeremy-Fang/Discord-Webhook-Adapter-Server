@@ -20,9 +20,9 @@ export const getDiscordWebhookById = async (request: Request, response: Response
             throw new ResponseError('[ERROR] Malformed Request. Invalid UUID', 400);
         }
 
-        const data = await Map.findOne({ uuid });
+        const document = await Map.findOne({ uuid });
 
-        response.send({ status: 200, data });
+        response.send({ status: 200, document });
     } catch (err) {
         response.send({ status: err.status ? err.status: 500, message: err.message });
     }

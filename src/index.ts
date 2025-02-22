@@ -36,6 +36,6 @@ mongoose.connect(process.env.MONGO_DB_URI).then(async () => {
         console.log(`App is listening on port ${process.env.PORT}`);
 
         swaggerDocs(app, Number(process.env.PORT));
-        console.log(`Documentation available at http://localhost:${process.env.PORT}/docs`);
+        console.log(`Documentation available at http://localhost:${process.env.PORT}/api/docs`);
     });
 });
