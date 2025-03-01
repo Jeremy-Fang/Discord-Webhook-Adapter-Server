@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { generateCodeChallenge, generateCodeVerifier, generateState } from '../services/auth/pkce';
 import { getAccessToken } from '../services/itad/api';
 import { ResponseError } from '../types/types';
+import TokenMap from '../db/schemas/tokens';
 
 /**
  * Function which starts the PKCE authorization flow, generating a code_verifier, state, and challenge.
@@ -76,7 +77,60 @@ export const redirect = async (request: Request, response: Response) => {
             throw new ResponseError(access_token.message, 500);
         }
         
+        response.cookie('access_token', access_token);
+
         response.send({ status: 200, access_token });
+    } catch (err) {
+        response.send({ status: err.status ? err.status: 500, message: err.message });
+    }
+}
+
+/**
+ * Function that registers an access token with a Discord user
+ * 
+ * @param request 
+ * @param response 
+ */
+export const register = async (request: Request, response: Response) => {
+    try {
+        const body = request.body;
+        const id = body.id;
+        const access_token = body.access_token;
+
+        if (!id) {
+            throw new ResponseError('[ERROR] Malformed Request. Id is missing', 400);
+        }
+
+        if (!access_token) {
+            throw new ResponseError('[ERROR] Malformed Request. Access token is missing', 400);
+        }
+
+        const document = await TokenMap.create({ discord_id: id, token: access_token });
+
+        response.send({ status: 200, message: 'Document successfully created' });
+    } catch (err) {
+        response.send({ status: err.status ? err.status: 500, message: err.message });
+    }
+}
+
+/**
+ * Get an access token associated with a Discord user
+ * 
+ * @param request 
+ * @param response 
+ */
+export const getToken = async (request: Request, response: Response) => {
+    try {
+        const params = request.params;
+        const id = params.id;
+
+        const document = await TokenMap.findOne({ discord_id: id });
+
+        if (!document) {
+            throw new ResponseError('[ERROR] Token not Found.', 404);
+        }
+
+        response.send({ status: 200, document });
     } catch (err) {
         response.send({ status: err.status ? err.status: 500, message: err.message });
     }
