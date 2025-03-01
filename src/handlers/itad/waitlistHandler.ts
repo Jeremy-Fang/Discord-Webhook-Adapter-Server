@@ -16,7 +16,14 @@ import { ResponseError } from '../../types/types';
  */
 export const getWaitlistHandler = async (request: Request, response: Response) => {
     try {
-        const token = request.cookies.access_token;
+        const authHeader = request.headers.authorization;
+
+        if (!authHeader.startsWith('Bearer')) {
+            throw new ResponseError(`[ERROR] Malformed Request. Invalid Authorization Header`, 400);
+        }
+
+        // acquire token from authorization header
+        const token = authHeader.split(' ')[1];
 
         const waitlistResponse= await getWaitlist(token);
 
@@ -41,14 +48,34 @@ export const addToWaitlistHandler = async (request: Request, response: Response)
     try {
         const body = request.body;
         const ids = body.ids;
+        const authHeader = request.headers.authorization;
+
+
+        if (!authHeader.startsWith('Bearer')) {
+            throw new ResponseError(`[ERROR] Malformed Request. Invalid Authorization Header`, 400);
+        }
+
+        // acquire token from authorization header
+        const token = authHeader.split(' ')[1];
 
         if (!ids) {
             throw new ResponseError('[ERROR] Malformed Request. Game ID(s) is missing', 400);
         }
 
-        const token = request.cookies.access_token;
+        const itadIds = await steamIdsToITADIds(ids);
 
-        const res = await addToWaitlist(token, ids);
+        if (itadIds.status != 200) {
+            throw new ResponseError(itadIds.message, itadIds.status);
+        }
+
+        // filter nulls out of ids and transform Steam game ids to IsThereAnyDeal game ids
+        const filteredIds = itadIds.ids.filter(entry => entry != null);
+
+        if (!filteredIds.length) {
+            throw new ResponseError('[ERROR] No Provided Ids match a Game.', 404);
+        }
+
+        const res = await addToWaitlist(token, filteredIds);
 
         if (res.status != 200) {
             throw new ResponseError(res.message, res.status);
@@ -71,14 +98,33 @@ export const deleteFromWaitlistHandler = async (request: Request, response: Resp
     try {
         const body = request.body;
         const ids = body.ids;
+        const authHeader = request.headers.authorization;
+
+        if (!authHeader.startsWith('Bearer')) {
+            throw new ResponseError(`[ERROR] Malformed Request. Invalid Authorization Header`, 400);
+        }
+
+        // acquire token from authorization header
+        const token = authHeader.split(' ')[1];
 
         if (!ids) {
             throw new ResponseError('[ERROR] Malformed Request. Game ID(s) is missing', 400);
         }
 
-        const token = request.cookies.access_token;
+        const itadIds = await steamIdsToITADIds(ids);
 
-        const res = await deleteFromWaitlist(token, ids);
+        if (itadIds.status != 200) {
+            throw new ResponseError(itadIds.message, itadIds.status);
+        }
+
+        // filter nulls out of ids and transform Steam game ids to IsThereAnyDeal game ids
+        const filteredIds = itadIds.ids.filter(entry => entry != null);
+
+        if (!filteredIds.length) {
+            throw new ResponseError('[ERROR] No Provided Ids match a Game.', 404);
+        }
+
+        const res = await deleteFromWaitlist(token, filteredIds);
 
         if (res.status != 200) {
             throw new ResponseError(res.message, res.status);
@@ -101,6 +147,14 @@ export const addSteamWishlist = async (request: Request, response: Response) => 
     try {
         const params = request.params;
         const steamid = params.steamid;
+        const authHeader = request.headers.authorization;
+
+        if (!authHeader.startsWith('Bearer')) {
+            throw new ResponseError(`[ERROR] Malformed Request. Invalid Authorization Header`, 400);
+        }
+
+        // acquire token from authorization header
+        const token = authHeader.split(' ')[1];
 
         const wishlist = await getWishlist(steamid);
 
@@ -109,7 +163,6 @@ export const addSteamWishlist = async (request: Request, response: Response) => 
         } 
 
         const ITADIds = await steamIdsToITADIds(wishlist.wishlist);
-        const token = request.cookies.access_token;
 
         if (ITADIds.status != 200) {
             throw new ResponseError(wishlist.message, wishlist.status);

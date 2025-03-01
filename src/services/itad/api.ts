@@ -38,6 +38,7 @@ export const steamIdsToITADIds = async (ids: number[]) => {
 export const getWaitlist = async (token: string) => {
     try {
         const headers = {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         };
         

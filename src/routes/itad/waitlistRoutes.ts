@@ -18,7 +18,7 @@ waitlistRouter.use(isAuthorized);
  *      summary: Retrieves a Users IsThereAnyDeal Waitlist
  *      description: |
  *          Responds with the users IsThereAnyDeal waitlist if a 
- *          valid access token is provided in the client cookies
+ *          valid access token is provided in the request headers
  *      tags:
  *          - Waitlist:
  *      responses:
@@ -56,6 +56,8 @@ waitlistRouter.get('/', getWaitlistHandler);
  *              description: Bad Request. Request body possibly missing or malformed
  *          401:
  *              description: Access token not provided or invalid
+ *          404:
+ *              description: No Ids matched a game
  */
 waitlistRouter.put('/add', addToWaitlistHandler);
 
@@ -84,6 +86,8 @@ waitlistRouter.put('/add', addToWaitlistHandler);
  *              description: Bad Request. Request body possibly missing or malformed
  *          401:
  *              description: Access token not provided or invalid
+ *          404:
+ *              description: No Ids matched a game
  */
 waitlistRouter.delete('/remove', deleteFromWaitlistHandler);
 

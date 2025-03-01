@@ -17,7 +17,7 @@ export const getWishlist = async (steamid: string) => {
         const response = await fetch(url);
 
         if (response.status == 400) {
-            throw new ResponseError('[ERROR] Bad Request. Make sure the appid is correct', 400);
+            throw new ResponseError('[ERROR] Bad Request. Make sure the steamid is correct', 400);
         }
 
         const wishlist = await response.json() as SteamWishlistResponse;
@@ -50,7 +50,7 @@ export const getUserPublicStatus = async (steamid: string) => {
         const response = await fetch(url);
 
         if (response.status == 400) {
-            throw new ResponseError('[ERROR] Bad Request. Make sure the appid is correct', 400);
+            throw new ResponseError('[ERROR] Bad Request. Make sure the steamid is correct', 400);
         }
 
         const user = await response.json() as SteamUserProfileResponse;
